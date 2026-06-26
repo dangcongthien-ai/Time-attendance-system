@@ -1,0 +1,823 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Admin Panel - Face Attendance</title>
+
+<style>
+:root{
+  --bg:#101114;
+  --sidebar:#17191f;
+  --surface:#1f222a;
+  --surface-2:#262a33;
+  --border:rgba(255,255,255,.10);
+  --text:#f3f4f6;
+  --muted:#a1a1aa;
+  --blue:#3b82f6;
+  --green:#22c55e;
+  --yellow:#facc15;
+  --red:#ef4444;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  height:100vh;
+  font-family:Inter,Segoe UI,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+
+.wrap{display:flex;height:100%}
+
+.sidebar{
+  width:248px;
+  background:var(--sidebar);
+  border-right:1px solid var(--border);
+  padding:18px;
+}
+
+.sidebar h2{
+  margin:4px 0 22px;
+  font-size:13px;
+  letter-spacing:2px;
+  color:#d4d4d8;
+}
+
+.sidebar a{
+  display:block;
+  padding:11px 10px;
+  color:var(--text);
+  text-decoration:none;
+  border-radius:8px;
+  font-size:14px;
+}
+
+.sidebar a.active,
+.sidebar a:hover{background:rgba(255,255,255,.07)}
+.logout{margin-top:28px;color:#fca5a5!important}
+
+.main{flex:1;padding:22px;overflow:auto}
+.section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}
+h1{font-size:24px;margin:0}
+h2{font-size:16px;margin:0 0 12px}
+
+.metrics-grid{
+  display:grid;
+  grid-template-columns:repeat(6,minmax(120px,1fr));
+  gap:12px;
+  margin-bottom:16px;
+}
+
+.metric-card,
+.panel{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:8px;
+}
+
+.metric-card{
+  min-height:92px;
+  padding:14px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+
+.metric-label{font-size:12px;color:var(--muted)}
+.metric-value{font-size:28px;font-weight:700}
+.metric-accent{height:3px;border-radius:999px;background:var(--blue);width:42px}
+
+.dashboard-grid{
+  display:grid;
+  grid-template-columns:minmax(280px,360px) 1fr;
+  gap:12px;
+}
+
+.panel{padding:14px}
+.status-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)}
+.status-row:last-child{border-bottom:0}
+.muted{color:var(--muted)}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:10px;
+}
+
+th,td{
+  padding:10px;
+  border-bottom:1px solid var(--border);
+  text-align:left;
+  font-size:14px;
+}
+
+th{color:var(--muted);font-size:12px;font-weight:600}
+
+.table-small th,
+.table-small td{font-size:13px;padding:8px}
+
+.btn{
+  min-height:34px;
+  padding:8px 14px;
+  border-radius:8px;
+  border:1px solid transparent;
+  cursor:pointer;
+  font-size:13px;
+  color:white;
+  background:var(--surface-2);
+}
+
+.btn.primary{background:var(--blue)}
+.btn.danger{background:var(--red)}
+.btn:hover{filter:brightness(1.08)}
+
+.badge{
+  display:inline-flex;
+  align-items:center;
+  min-height:24px;
+  padding:4px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:600;
+  white-space:nowrap;
+}
+
+.badge.ok{background:rgba(34,197,94,.18);color:#86efac}
+.badge.no{background:rgba(250,204,21,.18);color:#fde68a}
+.badge.bad{background:rgba(239,68,68,.18);color:#fca5a5}
+.badge.neutral{background:#343842;color:#e5e7eb}
+
+label{display:block;font-size:13px;color:var(--muted);margin-top:12px}
+input,select{
+  width:100%;
+  min-height:36px;
+  padding:8px;
+  margin-top:4px;
+  background:#15171c;
+  border:1px solid var(--border);
+  color:var(--text);
+  border-radius:8px;
+}
+
+.history-controls{
+  display:grid;
+  grid-template-columns:170px 170px 1fr 170px 150px 100px;
+  gap:8px;
+  align-items:end;
+  margin:12px 0;
+}
+
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(220px,1fr));
+  gap:10px 16px;
+  max-width:760px;
+}
+
+.inline-status{font-size:13px;color:#86efac;margin-top:10px}
+.err{color:#fca5a5;font-size:12px;margin:4px 0;display:none}
+
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.72);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:100;
+  padding:18px;
+}
+
+.modal-box{
+  width:420px;
+  max-width:100%;
+  background:#15171c;
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:16px;
+}
+
+.capture-panel{
+  background:#15171c;
+  padding:22px;
+  border-radius:8px;
+  border:1px solid var(--border);
+  text-align:center;
+}
+
+.scanner{
+  position:relative;
+  width:360px;
+  height:360px;
+  margin:auto;
+}
+
+.camera-box{
+  position:absolute;
+  inset:20px;
+  border-radius:50%;
+  overflow:hidden;
+  background:#000;
+  z-index:2;
+  box-shadow:0 6px 20px rgba(0,0,0,.6);
+}
+
+.camera-box img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.radial-bars{
+  position:absolute;
+  inset:0;
+  border-radius:50%;
+  pointer-events:none;
+  z-index:1;
+}
+
+.radial-bar{
+  position:absolute;
+  left:50%;
+  top:0;
+  width:4px;
+  height:28px;
+  background:rgba(255,255,255,.12);
+  transform-origin:50% 180px;
+  border-radius:2px;
+  transition:background .12s, transform .12s;
+}
+
+.radial-bar.active{
+  background:var(--green);
+  transform:scaleY(1.25);
+  box-shadow:0 0 8px rgba(34,197,94,.7);
+}
+
+.capture-hint{margin-top:14px;color:#86efac;font-size:14px}
+
+@media (max-width:1100px){
+  .metrics-grid{grid-template-columns:repeat(3,minmax(140px,1fr))}
+  .dashboard-grid{grid-template-columns:1fr}
+  .history-controls{grid-template-columns:repeat(2,minmax(150px,1fr))}
+}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+<aside class="sidebar">
+  <h2>ADMIN PANEL</h2>
+  <a id="link_dashboard" class="active" href="#" onclick="showSection('dashboard')">Dashboard</a>
+  <a id="link_users" href="#" onclick="showSection('users')">Users</a>
+  <a id="link_history" href="#" onclick="showSection('history')">Attendance History</a>
+  <a id="link_settings" href="#" onclick="showSection('settings')">Settings</a>
+  <a href="/admin/logout" class="logout">Logout</a>
+</aside>
+
+<main class="main">
+  <section id="section_dashboard">
+    <div class="section-head">
+      <h1>Dashboard</h1>
+      <button class="btn primary" onclick="loadDashboard()">Refresh</button>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric-card"><div class="metric-label">Users</div><div id="metric_users" class="metric-value">0</div><div class="metric-accent"></div></div>
+      <div class="metric-card"><div class="metric-label">Faces Ready</div><div id="metric_faces" class="metric-value">0</div><div class="metric-accent" style="background:var(--green)"></div></div>
+      <div class="metric-card"><div class="metric-label">Present</div><div id="metric_present" class="metric-value">0</div><div class="metric-accent" style="background:var(--green)"></div></div>
+      <div class="metric-card"><div class="metric-label">Absent</div><div id="metric_absent" class="metric-value">0</div><div class="metric-accent" style="background:var(--red)"></div></div>
+      <div class="metric-card"><div class="metric-label">Late</div><div id="metric_late" class="metric-value">0</div><div class="metric-accent" style="background:var(--yellow)"></div></div>
+      <div class="metric-card"><div class="metric-label">Early</div><div id="metric_early" class="metric-value">0</div><div class="metric-accent" style="background:var(--yellow)"></div></div>
+    </div>
+
+    <div class="dashboard-grid">
+      <div class="panel">
+        <h2>System Status</h2>
+        <div id="system_status"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Recent Events</h2>
+        <table class="table-small">
+          <thead><tr><th>Time</th><th>ID</th><th>Name</th><th>Action</th></tr></thead>
+          <tbody id="recent_body"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="section_users" style="display:none">
+    <div class="section-head">
+      <h1>User Management</h1>
+      <button class="btn primary" onclick="openAdd()">Add User</button>
+    </div>
+
+    <div class="panel">
+      <table>
+        <thead><tr><th>ID</th><th>Name</th><th>Face</th><th>Role</th><th>Action</th></tr></thead>
+        <tbody id="users_body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="section_history" style="display:none">
+    <div class="section-head">
+      <h1>Attendance History</h1>
+    </div>
+
+    <div class="panel">
+      <div class="history-controls">
+        <div><label>From</label><input id="h_from" type="date"></div>
+        <div><label>To</label><input id="h_to" type="date"></div>
+        <div><label>Name or ID</label><input id="h_search" placeholder="Search"></div>
+        <div><label>Status</label><select id="h_status"><option value="all">All statuses</option><option value="full">Full</option><option value="incomplete">Incomplete</option><option value="absent">Absent</option></select></div>
+        <div><label>Late/Early</label><select id="h_lateearly"><option value="all">All</option><option value="late">Late</option><option value="early">Early</option></select></div>
+        <button class="btn primary" onclick="applyHistoryFilters()">Search</button>
+      </div>
+
+      <table class="table-small">
+        <thead>
+          <tr><th>Date</th><th>ID</th><th>Name</th><th>First IN</th><th>Last OUT</th><th>Worked</th><th>Status</th><th>Action</th></tr>
+        </thead>
+        <tbody id="history_body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="section_settings" style="display:none">
+    <div class="section-head">
+      <h1>System Settings</h1>
+    </div>
+
+    <div class="panel">
+      <div class="form-grid">
+        <div><label>Shift Start</label><input id="s_shift_start" type="time"></div>
+        <div><label>Shift End</label><input id="s_shift_end" type="time"></div>
+        <div><label>Min IN to OUT (sec)</label><input id="s_min_in_out" type="number" min="0"></div>
+        <div><label>Min OUT to IN (sec)</label><input id="s_min_out_in" type="number" min="0"></div>
+        <div><label>Overlay Duration (sec)</label><input id="s_overlay" type="number" min="1"></div>
+        <div><label>Camera Source</label><input id="s_camera_source" autocomplete="off"></div>
+        <div><label>New Admin Password</label><input id="s_admin_pass" type="password" placeholder="Leave blank to keep current password"></div>
+      </div>
+
+      <div style="margin-top:18px">
+        <button class="btn primary" onclick="saveSettings()">Save Settings</button>
+        <div id="settings_status" class="inline-status"></div>
+      </div>
+    </div>
+  </section>
+</main>
+</div>
+
+<div class="modal" id="addModal">
+  <div class="modal-box">
+    <h3>Add User</h3>
+    <label>Name</label>
+    <input id="aname" autocomplete="off">
+    <div id="err_capture" class="err"></div>
+    <div id="err_save" class="err"></div>
+
+    <label>Role</label>
+    <select id="arole">
+      <option value="employee">Employee</option>
+      <option value="admin">Administrator</option>
+    </select>
+
+    <label>Face</label>
+    <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
+      <span id="face_status" class="badge no">Not Set</span>
+      <button class="btn primary" onclick="startCapture()">Capture</button>
+    </div>
+
+    <div style="margin-top:16px;text-align:right">
+      <button class="btn primary" onclick="saveUser()">Save</button>
+      <button class="btn danger" onclick="closeAdd()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="deleteModal">
+  <div class="modal-box">
+    <h3>Delete User</h3>
+    <p id="delete_text" class="muted"></p>
+    <div style="margin-top:16px;text-align:right">
+      <button class="btn danger" onclick="confirmDelete()">Delete</button>
+      <button class="btn" onclick="closeDelete()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="errorModal">
+  <div class="modal-box">
+    <h3 style="color:#fca5a5">Action Denied</h3>
+    <p id="error_text" class="muted"></p>
+    <div style="margin-top:16px;text-align:right">
+      <button class="btn primary" onclick="closeError()">OK</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="captureModal">
+  <div class="capture-panel">
+    <div class="scanner">
+      <div class="radial-bars" id="radialBars"></div>
+      <div class="camera-box"><img id="admin_cam" alt="camera feed"></div>
+    </div>
+    <p id="cap_text" class="capture-hint">Align your face</p>
+  </div>
+</div>
+
+<div class="modal" id="detailsModal">
+  <div class="modal-box" style="width:560px">
+    <h3>Day Details</h3>
+    <div id="details_content" class="muted" style="font-size:14px;max-height:320px;overflow:auto"></div>
+    <div style="margin-top:12px;text-align:right">
+      <button class="btn primary" onclick="closeDetails()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let FACE_READY = false;
+let DELETE_ID = null;
+let CAP_TIMER = null;
+const BAR_COUNT = 60;
+let latestBarsCount = 0;
+
+async function apiFetch(url, options={}){
+  const response = await fetch(url, options);
+  if(response.status === 401){
+    window.location.href = "/login";
+    throw new Error("Unauthorized");
+  }
+  return response;
+}
+
+function statusBadge(value, okText="Ready", badText="Not Ready"){
+  return value
+    ? `<span class="badge ok">${okText}</span>`
+    : `<span class="badge bad">${badText}</span>`;
+}
+
+function formatDateTime(iso){
+  if(!iso) return "-";
+  try{return new Date(iso).toLocaleString([], {hour:"2-digit", minute:"2-digit", year:"numeric", month:"2-digit", day:"2-digit"});}
+  catch(e){return iso;}
+}
+
+function formatTime(iso){
+  if(!iso) return "-";
+  try{return new Date(iso).toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});}
+  catch(e){return iso;}
+}
+
+function formatWorked(minutes){
+  if(!minutes) return "-";
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return `${h}h ${String(m).padStart(2, "0")}m`;
+}
+
+async function loadDashboard(){
+  const r = await apiFetch("/api/dashboard");
+  const d = await r.json();
+  const m = d.metrics || {};
+  metric_users.innerText = m.total_users || 0;
+  metric_faces.innerText = m.configured_faces || 0;
+  metric_present.innerText = m.present_today || 0;
+  metric_absent.innerText = m.absent_today || 0;
+  metric_late.innerText = m.late_today || 0;
+  metric_early.innerText = m.early_today || 0;
+
+  const s = d.system || {};
+  system_status.innerHTML = `
+    <div class="status-row"><span>Camera</span>${statusBadge(s.camera_active, "Online", "Offline")}</div>
+    <div class="status-row"><span>Face Model</span>${statusBadge(s.face_model_loaded, "Loaded", "Missing")}</div>
+    <div class="status-row"><span>Liveness Model</span>${statusBadge(s.liveness_model_loaded, "Loaded", "Missing")}</div>
+    <div class="status-row"><span>Threshold</span><span class="muted">${Number(s.recognition_threshold || 0).toFixed(2)}</span></div>
+    <div class="status-row"><span>Camera Error</span><span class="muted">${s.camera_error || "-"}</span></div>
+  `;
+
+  const events = d.recent_events || [];
+  recent_body.innerHTML = events.length ? events.map(ev=>`
+    <tr>
+      <td>${formatDateTime(ev.ts)}</td>
+      <td>${ev.user_id || "-"}</td>
+      <td>${ev.name || "-"}</td>
+      <td>${String(ev.action || "").toUpperCase()}</td>
+    </tr>
+  `).join("") : `<tr><td colspan="4" class="muted">No events yet</td></tr>`;
+}
+
+function initRadialBars(){
+  const container = document.getElementById("radialBars");
+  if(!container) return;
+  container.innerHTML = "";
+  for(let i = 0; i < BAR_COUNT; i++){
+    const bar = document.createElement("div");
+    bar.className = "radial-bar";
+    bar.style.transform = `rotate(${i * (360 / BAR_COUNT)}deg)`;
+    container.appendChild(bar);
+  }
+}
+
+async function loadUsers(){
+  const r = await apiFetch("/api/users");
+  const data = await r.json();
+  users_body.innerHTML = data.map(u=>`
+    <tr>
+      <td>${u.id}</td>
+      <td>${u.name}</td>
+      <td>${u.configured ? '<span class="badge ok">Configured</span>' : '<span class="badge no">Not Set</span>'}</td>
+      <td>${u.role}</td>
+      <td><button class="btn danger" onclick="deleteUser(${u.id},'${u.name.replace(/'/g,"\\'")}')">Delete</button></td>
+    </tr>
+  `).join("");
+}
+
+function resetErrors(){
+  err_capture.style.display = "none";
+  err_save.style.display = "none";
+}
+
+function openAdd(){
+  FACE_READY = false;
+  aname.value = "";
+  face_status.innerText = "Not Set";
+  face_status.className = "badge no";
+  resetErrors();
+  addModal.style.display = "flex";
+}
+
+function closeAdd(){
+  apiFetch("/api/capture/cancel", {method:"POST"}).catch(()=>{});
+  addModal.style.display = "none";
+}
+
+async function startCapture(){
+  resetErrors();
+  if(!aname.value.trim()){
+    err_capture.innerText = "Please enter name before capturing face";
+    err_capture.style.display = "block";
+    return;
+  }
+
+  const r = await apiFetch("/api/capture/start", {method:"POST"});
+  if(!r.ok){ showError("Cannot start capture"); return; }
+
+  initRadialBars();
+  latestBarsCount = 0;
+  captureModal.style.display = "flex";
+  admin_cam.src = "/video_feed";
+
+  CAP_TIMER = setInterval(async ()=>{
+    const response = await apiFetch("/api/capture/status");
+    const state = await response.json();
+    cap_text.innerText = state.message || "Align your face";
+    const progress = Math.max(0, Math.min(100, state.progress || 0));
+    const activeCount = Math.floor(progress / 100 * BAR_COUNT);
+    if(activeCount !== latestBarsCount){
+      latestBarsCount = activeCount;
+      document.querySelectorAll(".radial-bar").forEach((bar, index)=>{
+        bar.classList.toggle("active", index < activeCount);
+      });
+    }
+
+    if(state.done){
+      clearInterval(CAP_TIMER);
+      CAP_TIMER = null;
+      FACE_READY = true;
+      face_status.innerText = "Configured";
+      face_status.className = "badge ok";
+      document.querySelectorAll(".radial-bar").forEach(bar=>bar.classList.add("active"));
+      closeCapture();
+    }
+  }, 500);
+}
+
+function closeCapture(){
+  if(CAP_TIMER){
+    clearInterval(CAP_TIMER);
+    CAP_TIMER = null;
+  }
+  admin_cam.src = "";
+  captureModal.style.display = "none";
+}
+
+async function saveUser(){
+  resetErrors();
+  if(!aname.value.trim()){
+    err_save.innerText = "Name is required";
+    err_save.style.display = "block";
+    return;
+  }
+  if(!FACE_READY){
+    err_save.innerText = "Face data is not complete";
+    err_save.style.display = "block";
+    return;
+  }
+
+  const fd = new FormData();
+  fd.append("name", aname.value.trim());
+  fd.append("role", arole.value);
+  const r = await apiFetch("/api/users/save", {method:"POST", body:fd});
+  if(!r.ok){ showError("Cannot save user"); return; }
+
+  await loadUsers();
+  await loadDashboard();
+  closeAdd();
+}
+
+function deleteUser(id, name){
+  DELETE_ID = id;
+  delete_text.innerText = `Delete user "${name}"? This action cannot be undone.`;
+  deleteModal.style.display = "flex";
+}
+
+function closeDelete(){
+  DELETE_ID = null;
+  deleteModal.style.display = "none";
+}
+
+async function confirmDelete(){
+  if(!DELETE_ID) return;
+  const r = await apiFetch(`/api/users/${DELETE_ID}`, {method:"DELETE"});
+  if(!r.ok){
+    let err = {};
+    try{err = await r.json();}catch(e){}
+    closeDelete();
+    showError(err.detail || "Cannot delete user");
+    return;
+  }
+  closeDelete();
+  await loadUsers();
+  await loadDashboard();
+}
+
+function showError(msg){
+  error_text.innerText = msg;
+  errorModal.style.display = "flex";
+}
+
+function closeError(){
+  errorModal.style.display = "none";
+}
+
+function showSection(name){
+  ["dashboard","users","history","settings"].forEach(section=>{
+    document.getElementById(`section_${section}`).style.display = name === section ? "" : "none";
+    document.getElementById(`link_${section}`).classList.toggle("active", name === section);
+  });
+
+  if(name === "dashboard") loadDashboard();
+  if(name === "users") loadUsers();
+  if(name === "history"){
+    setDefaultDates();
+    applyHistoryFilters();
+  }
+  if(name === "settings") loadSettingsUI();
+}
+
+function setDefaultDates(){
+  const today = new Date();
+  const iso = d=>d.toISOString().slice(0,10);
+  if(!h_from.value) h_from.value = iso(today);
+  if(!h_to.value) h_to.value = iso(today);
+}
+
+function dateDiffDays(a,b){
+  return Math.round((new Date(b) - new Date(a)) / (24 * 3600 * 1000));
+}
+
+async function applyHistoryFilters(){
+  const from = h_from.value;
+  const to = h_to.value;
+  if(!from || !to){ showError("Please select both dates"); return; }
+  if(new Date(to) < new Date(from)){ showError("To date must be same or later than From date"); return; }
+  if(dateDiffDays(from, to) > 31){ showError("Maximum date range is 31 days"); return; }
+  await loadHistory();
+}
+
+async function loadHistory(){
+  const params = new URLSearchParams();
+  params.append("from_date", h_from.value);
+  params.append("to_date", h_to.value);
+  const q = h_search.value.trim();
+  if(q){
+    if(/^\d+$/.test(q)) params.append("id", q);
+    else params.append("name", q);
+  }
+  if(h_status.value !== "all") params.append("status", h_status.value);
+  if(h_lateearly.value !== "all") params.append("late_early", h_lateearly.value);
+
+  const r = await apiFetch("/api/attendance/history?" + params.toString());
+  if(!r.ok){ showError("Error loading history"); return; }
+  renderHistoryTable(await r.json());
+}
+
+function renderHistoryTable(data){
+  history_body.innerHTML = data.length ? data.map(row=>{
+    const inText = row.earliest_in ? `${formatTime(row.earliest_in)}${row.late ? ' <span style="color:#fca5a5;font-weight:600">(Late)</span>' : ""}` : "-";
+    const outText = row.latest_out ? `${formatTime(row.latest_out)}${row.early ? ' <span style="color:#fde68a;font-weight:600">(Early)</span>' : ""}` : "-";
+    let statusLabel = '<span class="badge neutral">Unknown</span>';
+    if(row.status === "full") statusLabel = '<span class="badge ok">Full</span>';
+    if(row.status === "incomplete") statusLabel = '<span class="badge no">Incomplete</span>';
+    if(row.status === "absent") statusLabel = '<span class="badge neutral">Absent</span>';
+
+    return `<tr>
+      <td>${row.date}</td>
+      <td>${row.user_id || "-"}</td>
+      <td>${row.name || "-"}</td>
+      <td>${inText}</td>
+      <td>${outText}</td>
+      <td>${formatWorked(row.worked_minutes)}</td>
+      <td>${statusLabel}</td>
+      <td><button class="btn" onclick="openDetails(${row.user_id || 0},'${row.date}')">Details</button></td>
+    </tr>`;
+  }).join("") : `<tr><td colspan="8" class="muted">No rows found</td></tr>`;
+}
+
+async function openDetails(user_id, date){
+  if(!user_id){
+    details_content.innerHTML = '<div style="padding:8px">No events recorded</div>';
+    detailsModal.style.display = "flex";
+    return;
+  }
+
+  const r = await apiFetch(`/api/attendance/details?user_id=${user_id}&date=${date}`);
+  if(!r.ok){ showError("Cannot load details"); return; }
+  const data = await r.json();
+  if(!data.length){
+    details_content.innerHTML = '<div style="padding:8px">No events recorded</div>';
+    detailsModal.style.display = "flex";
+    return;
+  }
+
+  details_content.innerHTML = `<table><thead><tr><th>Time</th><th>Action</th></tr></thead><tbody>${
+    data.map(ev=>`<tr><td>${formatDateTime(ev.ts)}</td><td>${String(ev.action || "").toUpperCase()}</td></tr>`).join("")
+  }</tbody></table>`;
+  detailsModal.style.display = "flex";
+}
+
+function closeDetails(){
+  detailsModal.style.display = "none";
+}
+
+async function loadSettingsUI(){
+  const r = await apiFetch("/api/settings");
+  const s = await r.json();
+  s_shift_start.value = s.shift_start || "09:00";
+  s_shift_end.value = s.shift_end || "17:00";
+  s_min_in_out.value = s.min_in_to_out || 60;
+  s_min_out_in.value = s.min_out_to_in || 60;
+  s_overlay.value = s.overlay_duration || 5;
+  s_camera_source.value = s.camera_source || "0";
+  s_admin_pass.value = "";
+  settings_status.innerText = "";
+}
+
+async function saveSettings(){
+  const fd = new FormData();
+  fd.append("shift_start", s_shift_start.value);
+  fd.append("shift_end", s_shift_end.value);
+  fd.append("min_in_to_out", s_min_in_out.value);
+  fd.append("min_out_to_in", s_min_out_in.value);
+  fd.append("overlay_duration", s_overlay.value);
+  fd.append("camera_source", s_camera_source.value);
+  if(s_admin_pass.value.trim()){
+    fd.append("admin_password", s_admin_pass.value.trim());
+  }
+
+  const r = await apiFetch("/api/settings", {method:"POST", body:fd});
+  if(!r.ok){ showError("Cannot save settings"); return; }
+  s_admin_pass.value = "";
+  settings_status.innerText = "Settings saved";
+  await loadDashboard();
+}
+
+initRadialBars();
+loadDashboard();
+loadUsers();
+
+window.openAdd = openAdd;
+window.closeAdd = closeAdd;
+window.startCapture = startCapture;
+window.saveUser = saveUser;
+window.deleteUser = deleteUser;
+window.closeDelete = closeDelete;
+window.confirmDelete = confirmDelete;
+window.showError = showError;
+window.closeError = closeError;
+window.openDetails = openDetails;
+window.closeDetails = closeDetails;
+window.showSection = showSection;
+window.applyHistoryFilters = applyHistoryFilters;
+window.loadDashboard = loadDashboard;
+window.saveSettings = saveSettings;
+</script>
+</body>
+</html>

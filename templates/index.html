@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <title>Face Attendance System</title>
+
+  <style>
+    :root{
+      --bg-main:#0b0f14;
+      --bg-mid:#121821;
+      --glass:rgba(255,255,255,0.04);
+      --border:rgba(255,255,255,0.08);
+      --text:#e5e7eb;
+      --muted:#9ca3af;
+      --accent:#22c55e;
+    }
+
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      height:100vh;
+      font-family: "Inter", "Segoe UI", Arial, sans-serif;
+      overflow:hidden;
+      background:
+        radial-gradient(1200px 600px at 50% -200px, var(--bg-mid), transparent),
+        linear-gradient(180deg, var(--bg-main), var(--bg-main));
+      color:var(--text);
+    }
+
+    header{
+      height:60px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 28px;
+      background:rgba(15,20,30,.72);
+      backdrop-filter: blur(10px);
+      border-bottom:1px solid var(--border);
+    }
+
+    .header-left{
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
+
+    .logo{
+      width:34px;
+      height:34px;
+      border-radius:10px;
+      background:linear-gradient(135deg,#22c55e,#16a34a);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:700;
+      color:#052e16;
+      font-size:14px;
+    }
+
+    .title-group{
+      display:flex;
+      flex-direction:column;
+      line-height:1.1;
+    }
+
+    .title-group h1{
+      font-size:14px;
+      letter-spacing:2px;
+      font-weight:600;
+      margin:0;
+      color:#e5e7eb;
+    }
+
+    .title-group span{
+      font-size:11px;
+      color:var(--muted);
+    }
+
+    .header-right{
+      display:flex;
+      align-items:center;
+      gap:16px;
+    }
+
+    .status{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .status-dot{
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:var(--accent);
+      box-shadow:0 0 8px rgba(34,197,94,.8);
+    }
+
+    .admin-btn{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 16px;
+      font-size:12px;
+      color:#ecfdf5;
+      border-radius:999px;
+      text-decoration:none;
+      background:linear-gradient(135deg,#22c55e,#16a34a);
+      box-shadow:
+        0 6px 16px rgba(0,0,0,.35),
+        inset 0 0 0 1px rgba(255,255,255,.15);
+      transition:.25s ease;
+    }
+
+    .admin-btn:hover{
+      transform:translateY(-1px);
+      box-shadow:
+        0 10px 24px rgba(0,0,0,.45),
+        inset 0 0 0 1px rgba(255,255,255,.25);
+    }
+
+    .stage{
+      height:calc(100vh - 60px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:22px;
+    }
+
+    .camera-frame{
+      width:100%;
+      height:100%;
+      max-width:1500px;
+      max-height:850px;
+      border-radius:20px;
+      background:var(--glass);
+      border:1px solid var(--border);
+      backdrop-filter: blur(10px);
+      box-shadow:0 18px 45px rgba(0,0,0,.55);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    #video_frame{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      background:transparent;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="logo">AI</div>
+    <div class="title-group">
+      <h1>FACE ATTENDANCE SYSTEM</h1>
+      <span>Real-time recognition</span>
+    </div>
+  </div>
+
+  <div class="header-right">
+    <div class="status">
+      <span class="status-dot"></span>
+      LIVE
+    </div>
+    <a class="admin-btn" href="/login">
+      ⚙ Admin
+    </a>
+  </div>
+</header>
+
+<div class="stage">
+  <div class="camera-frame">
+    <img id="video_frame" src="/video_feed" alt="Camera Stream">
+  </div>
+</div>
+
+</body>
+</html>

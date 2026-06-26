@@ -1,0 +1,63 @@
+# Python cache and build output
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+build/
+dist/
+*.egg-info/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# IDE and OS files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Runtime database and exports
+sqlite.db
+*.sqlite
+*.sqlite3
+attendance.xlsx
+*.log
+
+# Trained models and generated model metadata
+face_model.yml
+labels.npy
+threshold.npy
+anti_static_images/*.pth
+anti_static_images/*.pickle
+
+# Private biometric data and source videos
+dataset/
+anti_static_images/data/
+anti_static_images/videos/
+
+# Temporary media
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.jpg
+*.jpeg
+*.png
+!static/**
+!templates/**
