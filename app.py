@@ -1018,7 +1018,7 @@ def update_settings(
 if __name__ == "__main__":
     import uvicorn
 
-    attendance_url = "http://127.0.0.1:8000/attendance"
+    attendance_url = "http://localhost:8000/attendance"
     print(f"Attendance page: {attendance_url}")
     threading.Timer(1.5, webbrowser.open, args=(attendance_url,)).start()
     uvicorn.run("app:app", host="127.0.0.1", port=8000, reload=True)
