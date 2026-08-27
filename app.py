@@ -2,6 +2,7 @@ import os
 import shutil
 import threading
 import time
+import webbrowser
 from datetime import date as date_cls
 from datetime import datetime, time as dtime, timedelta
 from typing import Iterable, Optional
@@ -497,7 +498,12 @@ def api_last_event():
     return {"text": last_event_text, "ts": last_event_ts}
 
 
-@app.get("/", response_class=HTMLResponse)
+@app.get("/")
+def root():
+    return RedirectResponse(url="/attendance", status_code=302)
+
+
+@app.get("/attendance", response_class=HTMLResponse)
 def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request, "droid_default": CAM_DEFAULT_DROID_URL})
 
@@ -1012,4 +1018,7 @@ def update_settings(
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
+    attendance_url = "http://127.0.0.1:8000/attendance"
+    print(f"Attendance page: {attendance_url}")
+    threading.Timer(1.5, webbrowser.open, args=(attendance_url,)).start()
+    uvicorn.run("app:app", host="127.0.0.1", port=8000, reload=True)
